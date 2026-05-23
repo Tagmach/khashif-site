@@ -139,6 +139,15 @@
     border-bottom-color: var(--pulse);
     color: var(--echo);
   }
+  .row .val-pair {
+    display: inline-flex;
+    gap: 0.7rem;
+    align-items: baseline;
+  }
+  .sep {
+    color: var(--grove);
+    opacity: 0.55;
+  }
   .row span.val {
     color: var(--glow);
     cursor: default;
@@ -175,6 +184,14 @@
     </p>
     <p class="motto">Su + un = ekmek. &nbsp;Water and flour become bread — two known things making something neither could alone.</p>
     <nav class="links" aria-label="Related projects">
+      <div class="row">
+        <span class="label">Live viz</span>
+        <span class="val-pair">
+          <a href="/network/">Network<span class="arrow">↗</span></a>
+          <span class="sep">·</span>
+          <a href="/intersections/">Intersections<span class="arrow">↗</span></a>
+        </span>
+      </div>
       <div class="row">
         <span class="label">Open source</span>
         <a href="https://github.com/echo-toolkit/echo" rel="noopener">Echo Toolkit<span class="arrow">↗</span></a>
