@@ -12,8 +12,11 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: cloudflare/wrangler-action@v3
+      - uses: actions/setup-node@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: bdd96d90c2fbb83b64137a221ec9af8e
-          command: pages deploy . --project-name=khashif --branch=main
+          node-version: 20
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: bdd96d90c2fbb83b64137a221ec9af8e
+        run: npx --yes wrangler@3 pages deploy . --project-name=khashif --branch=main
