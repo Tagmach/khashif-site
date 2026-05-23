@@ -15,15 +15,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Debug — verify token reaches CI correctly
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          echo "Token length: ${#CLOUDFLARE_API_TOKEN}"
-          echo "Token first 6: ${CLOUDFLARE_API_TOKEN:0:6}"
-          echo "Token last 4: ${CLOUDFLARE_API_TOKEN: -4}"
-          echo "Verify endpoint result:"
-          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" https://api.cloudflare.com/client/v4/user/tokens/verify
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
