@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,46 +10,88 @@
   body { background: #060f0a; color: #d6e8dc; font-family: monospace; overflow: hidden; }
   canvas { display: block; }
   #ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-  #title { position: absolute; top: 20px; left: 24px; font-size: 13px; color: rgba(70,176,107,0.85); letter-spacing: 0.15em; text-transform: uppercase; }
-  #updated { position: absolute; top: 40px; left: 24px; font-size: 10px; color: rgba(189,242,208,0.4); }
-  #stats { position: absolute; top: 20px; right: 24px; text-align: right; font-size: 11px; color: rgba(214,232,220,0.55); line-height: 2; }
-  #legend { position: absolute; bottom: 24px; left: 24px; display: flex; flex-direction: column; gap: 7px; }
-  .leg { display: flex; align-items: center; gap: 9px; font-size: 11px; color: rgba(214,232,220,0.6); }
+  /* Overlay panels sit on top of the canvas with a subtle backdrop so the
+     dots underneath stay visible but the text remains legible — fixes the
+     overlap reported 26 May 2026. */
+  .panel {
+    position: absolute;
+    background: rgba(6,15,10,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 0.5px solid rgba(70,176,107,0.18);
+    border-radius: 6px;
+    padding: 10px 14px;
+    pointer-events: auto;
+  }
+  #title { top: 20px; left: 24px; font-size: 13px; color: rgba(70,176,107,0.85); letter-spacing: 0.15em; text-transform: uppercase; padding: 8px 14px 6px; }
+  #updated { top: 64px; left: 24px; font-size: 10px; color: rgba(189,242,208,0.55); padding: 6px 12px; }
+  #stats { top: 20px; right: 24px; text-align: right; font-size: 11px; color: rgba(214,232,220,0.7); line-height: 1.85; padding: 10px 14px; }
+  #legend { bottom: 24px; left: 24px; display: flex; flex-direction: column; gap: 7px; padding: 12px 14px; }
+  .leg { display: flex; align-items: center; gap: 9px; font-size: 11px; color: rgba(214,232,220,0.7); }
   .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-  #info { position: absolute; bottom: 24px; right: 24px; font-size: 10px; color: rgba(189,242,208,0.35); text-align: right; line-height: 1.8; max-width: 300px; }
+  #info { bottom: 24px; right: 24px; font-size: 10px; color: rgba(189,242,208,0.55); text-align: right; line-height: 1.7; max-width: 300px; padding: 10px 14px; }
   #tooltip { position: fixed; background: rgba(6,15,10,0.97); border: 0.5px solid rgba(70,176,107,0.45); border-radius: 8px; padding: 14px 18px; font-size: 12px; color: #d6e8dc; pointer-events: none; display: none; max-width: 380px; line-height: 1.55; z-index: 100; }
   #tooltip .ix-section { margin-top: 6px; padding-top: 6px; border-top: 0.5px solid rgba(70,176,107,0.18); }
-  #keywords { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 10px; color: rgba(189,242,208,0.3); text-align: center; max-width: 400px; }
+  /* Fullscreen toggle — top-right under stats; F key also toggles. */
+  #fs-btn {
+    position: absolute; top: 20px; right: 24px;
+    transform: translateY(78px);
+    background: rgba(6,15,10,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border: 0.5px solid rgba(70,176,107,0.35); color: rgba(189,242,208,0.75);
+    font-family: monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 7px 11px; border-radius: 5px; cursor: pointer; pointer-events: auto;
+    transition: all 0.15s;
+  }
+  #fs-btn:hover { color: #d6e8dc; border-color: #46b06b; }
 </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
 <div id="ui">
-  <div id="title">Khashif · Resonance Network</div>
-  <div id="updated">son gezi: —</div>
-  <div id="nav-mini" style="position:absolute;top:62px;left:24px;font-size:10px;letter-spacing:0.08em;pointer-events:auto;">
-    <a href="/" style="color:rgba(70,176,107,0.75);text-decoration:none;border-bottom:1px solid transparent;transition:border-color 0.2s;">← home</a>
+  <div id="title" class="panel">Khashif · Resonance Network</div>
+  <div id="updated" class="panel">last journey: —</div>
+  <div id="nav-mini" class="panel" style="top:104px;left:24px;font-size:10px;letter-spacing:0.08em;padding:6px 12px;">
+    <a href="/" style="color:rgba(70,176,107,0.85);text-decoration:none;">← home</a>
     <span style="opacity:0.35;margin:0 8px;color:#bdf2d0;">·</span>
-    <a href="/intersections/" style="color:rgba(70,176,107,0.75);text-decoration:none;">intersections</a>
+    <a href="/intersections/" style="color:rgba(70,176,107,0.85);text-decoration:none;">intersections</a>
   </div>
-  <div id="stats">
-    — düğüm · — bağlantı<br>
-    — rezonans · — kesişim<br>
-    — RSS · — kelime
+  <div id="stats" class="panel">
+    — nodes · — edges<br>
+    — resonant · — intersections<br>
+    — RSS · — keywords
   </div>
-  <div id="legend">
-    <div class="leg"><div class="leg-dot" style="background:#46b06b;box-shadow:0 0 6px rgba(70,176,107,0.6);"></div>Tagmac · merkez</div>
-    <div class="leg"><div class="leg-dot" style="background:#2f6b45;"></div>öncelikli kaynak</div>
-    <div class="leg"><div class="leg-dot" style="background:#6fe49b;"></div>dinamik (crawl)</div>
-    <div class="leg"><div class="leg-dot" style="background:#bdf2d0;"></div>rezonans içerik</div>
-    <div class="leg"><div class="leg-dot" style="background:#1a3a28;border:1px solid #2f6b45;"></div>alan (domain konsepti)</div>
-    <div class="leg"><div class="leg-dot" style="background:#46b06b;border:1.5px solid #6fe49b;box-shadow:0 0 6px rgba(111,228,155,0.7);"></div>kesişim (su+un=ekmek)</div>
-    <div class="leg"><div class="leg-dot" style="background:#ffffff;box-shadow:0 0 5px #fff;"></div>aksiyon eylemi</div>
+  <button id="fs-btn" title="Fullscreen (F)">⛶ fullscreen</button>
+  <div id="legend" class="panel">
+    <div class="leg"><div class="leg-dot" style="background:#46b06b;box-shadow:0 0 6px rgba(70,176,107,0.6);"></div>Tagmac · center</div>
+    <div class="leg"><div class="leg-dot" style="background:#2f6b45;"></div>priority source</div>
+    <div class="leg"><div class="leg-dot" style="background:#6fe49b;"></div>dynamic feed (crawl)</div>
+    <div class="leg"><div class="leg-dot" style="background:#bdf2d0;"></div>resonant content</div>
+    <div class="leg"><div class="leg-dot" style="background:#1a3a28;border:1px solid #2f6b45;"></div>domain concept</div>
+    <div class="leg"><div class="leg-dot" style="background:#46b06b;border:1.5px solid #6fe49b;box-shadow:0 0 6px rgba(111,228,155,0.7);"></div>intersection (water+flour=bread)</div>
+    <div class="leg"><div class="leg-dot" style="background:#ffffff;box-shadow:0 0 5px #fff;"></div>action item</div>
   </div>
-  <div id="info">her gezi sonunda otomatik güncellenir<br>khashif_network_viz.py</div>
+  <div id="info" class="panel">auto-refreshed after each journey<br>khashif_network_viz.py</div>
   <div id="diag" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#6fe49b;text-align:center;font-family:monospace;">BOOT · loading network data…</div>
 </div>
 <div id="tooltip"></div>
+<script>
+  // Fullscreen toggle — button or F key.
+  const fsBtn = document.getElementById('fs-btn');
+  function toggleFs() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+  if (fsBtn) fsBtn.addEventListener('click', toggleFs);
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'f' || e.key === 'F') toggleFs();
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (fsBtn) fsBtn.textContent = document.fullscreenElement ? '⤢ exit' : '⛶ fullscreen';
+  });
+</script>
 
 <script>
 const SUPABASE_URL = "https://iwfvlatywksvnnxymweb.supabase.co";
@@ -73,11 +115,11 @@ async function loadNetworkData() {
       NODES = network.nodes || [];
       EDGES = network.edges || [];
       const s = network.stats || {};
-      document.getElementById('updated').textContent = `son gezi: ${network.updated || '—'}`;
+      document.getElementById('updated').textContent = `last journey: ${network.updated || '—'}`;
       document.getElementById('stats').innerHTML =
-        `${s.node_count||0} düğüm · ${s.edge_count||0} bağlantı<br>` +
-        `${s.resonant_count||0} rezonans · ${s.intersection_count||0} kesişim<br>` +
-        `${s.feed_count||0} RSS · ${s.keyword_count||0} kelime`;
+        `${s.node_count||0} nodes · ${s.edge_count||0} edges<br>` +
+        `${s.resonant_count||0} resonant · ${s.intersection_count||0} intersections<br>` +
+        `${s.feed_count||0} RSS · ${s.keyword_count||0} keywords`;
       if (diag) diag.textContent = 'BOOT · loaded ' + NODES.length + ' nodes, ' + EDGES.length + ' edges · initializing…';
     } else {
       if (diag) diag.textContent = 'BOOT · ERR data shape unexpected (data='+JSON.stringify(data).slice(0,80)+'…)';
@@ -431,16 +473,16 @@ canvas.addEventListener('mousemove', e => {
 
     tooltip.innerHTML = `
       <div style="color:${isIntersection ? '#6fe49b' : isDomain ? '#bdf2d0' : '#46b06b'};font-weight:600;margin-bottom:6px;font-size:13px;">${n.type==='center'?'Tagmac Çankaya':n.label}</div>
-      <div style="color:rgba(214,232,220,0.5);font-size:11px;">tür: ${n.type}${isIntersection && n.avg_strength ? ` · ortalama güç ${n.avg_strength}/5` : ''}</div>
-      ${n.score ? `<div style="color:rgba(214,232,220,0.5);font-size:11px;">skor: ${n.score}/10</div>` : ''}
-      ${isIntersection && n.weight ? `<div style="color:rgba(189,242,208,0.6);font-size:11px;">ağırlık: ${n.weight} (kaç journey'de tekrar etti × ortalama güç)</div>` : ''}
+      <div style="color:rgba(214,232,220,0.5);font-size:11px;">type: ${n.type}${isIntersection && n.avg_strength ? ` · avg strength ${n.avg_strength}/5` : ''}</div>
+      ${n.score ? `<div style="color:rgba(214,232,220,0.5);font-size:11px;">score: ${n.score}/10</div>` : ''}
+      ${isIntersection && n.weight ? `<div style="color:rgba(189,242,208,0.6);font-size:11px;">weight: ${n.weight} (recurrences × avg strength)</div>` : ''}
       ${n.action && n.type !== 'intersection' ? `<div style="color:${actionColor};font-size:11px;margin-top:4px;">→ ${n.action}</div>` : ''}
-      ${n.reason ? `<div class="ix-section" style="color:rgba(214,232,220,0.7);font-size:11px;font-style:italic;">${isIntersection ? '<b style="color:#6fe49b;font-style:normal;">içgörü:</b><br>' : ''}${n.reason}</div>` : ''}
-      ${n.opportunity ? `<div class="ix-section" style="color:rgba(189,242,208,0.75);font-size:11px;"><b style="color:#6fe49b;">fırsat:</b><br>${n.opportunity}</div>` : ''}
-      ${isIntersection ? `<div class="ix-section" style="color:rgba(189,242,208,0.55);font-size:11px;">→ <b>${relatedContentCount}</b> içerik bu kesişime bağlı (canvas\\'ta ECHO/PULSE iplikler)</div>` : ''}
-      ${isDomain && bridgedIntersections.length ? `<div class="ix-section" style="color:rgba(189,242,208,0.55);font-size:11px;">→ <b>${bridgedIntersections.length}</b> kesişim bridges:<br>${bridgedIntersections.slice(0,5).map(l => `· ${l.substring(0,60)}`).join('<br>')}</div>` : ''}
+      ${n.reason ? `<div class="ix-section" style="color:rgba(214,232,220,0.7);font-size:11px;font-style:italic;">${isIntersection ? '<b style="color:#6fe49b;font-style:normal;">insight:</b><br>' : ''}${n.reason}</div>` : ''}
+      ${n.opportunity ? `<div class="ix-section" style="color:rgba(189,242,208,0.75);font-size:11px;"><b style="color:#6fe49b;">opportunity:</b><br>${n.opportunity}</div>` : ''}
+      ${isIntersection ? `<div class="ix-section" style="color:rgba(189,242,208,0.55);font-size:11px;">→ <b>${relatedContentCount}</b> items linked to this intersection (ECHO/PULSE threads on canvas)</div>` : ''}
+      ${isDomain && bridgedIntersections.length ? `<div class="ix-section" style="color:rgba(189,242,208,0.55);font-size:11px;">→ bridges <b>${bridgedIntersections.length}</b> intersections:<br>${bridgedIntersections.slice(0,5).map(l => `· ${l.substring(0,60)}`).join('<br>')}</div>` : ''}
       ${n.url ? `<div style="color:rgba(70,176,107,0.55);font-size:10px;margin-top:6px;word-break:break-all;">${n.url.substring(0,80)}</div>` : ''}
-      <div style="color:rgba(214,232,220,0.3);font-size:10px;margin-top:6px;">bağlantı: ${n.connections}${isIntersection && n.last_seen ? ` · son görüldü: ${n.last_seen}` : ''}</div>
+      <div style="color:rgba(214,232,220,0.3);font-size:10px;margin-top:6px;">connections: ${n.connections}${isIntersection && n.last_seen ? ` · last seen: ${n.last_seen}` : ''}</div>
     `;
   } else {
     tooltip.style.display = 'none';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,16 +62,20 @@
   }
   .boost-btn:hover { background: #ff9648; box-shadow: 0 0 32px rgba(255,128,48,0.7); transform: translateY(-1px); }
   .boost-btn:active { transform: translateY(1px); box-shadow: 0 0 12px rgba(255,128,48,0.5); }
-  .boost-select {
+  .boost-select, .boost-topic {
     background: #060f0a; color: #d6e8dc; border: 0.5px solid #2f6b45;
     font-family: inherit; font-size: 12px; padding: 18px 14px;
-    border-radius: 6px; outline: none; cursor: pointer;
-    letter-spacing: 0.1em;
+    border-radius: 6px; outline: none;
+    letter-spacing: 0.05em;
   }
-  .boost-select:focus { border-color: #46b06b; }
-  .console-aux { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+  .boost-select { cursor: pointer; }
+  .boost-topic { min-width: 220px; }
+  .boost-select:focus, .boost-topic:focus { border-color: #46b06b; }
+  .boost-topic::placeholder { color: rgba(189,242,208,0.35); font-style: italic; }
+  .console-aux { display: flex; gap: 12px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
   .aux-btn { background: transparent; color: rgba(189,242,208,0.6); border: 0.5px solid #1a3a28; font-family: inherit; font-size: 11px; padding: 10px 18px; border-radius: 4px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; }
   .aux-btn:hover { color: #6fe49b; border-color: #2f6b45; }
+  .console-help { font-size: 10px; color: rgba(189,242,208,0.4); margin-top: 14px; font-style: italic; line-height: 1.6; }
 
   /* modal */
   #modal { position: fixed; inset: 0; background: rgba(6,15,10,0.85); display: none; align-items: center; justify-content: center; z-index: 150; padding: 32px; }
@@ -87,7 +91,8 @@
   /* main grid */
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
   .panel { background: #0e2016; border: 0.5px solid #1a3a28; border-radius: 8px; padding: 20px; }
-  .panel h2 { font-size: 10px; letter-spacing: 0.25em; color: rgba(70,176,107,0.85); text-transform: uppercase; margin-bottom: 14px; font-weight: 400; }
+  .panel h2 { font-size: 10px; letter-spacing: 0.25em; color: rgba(70,176,107,0.85); text-transform: uppercase; margin-bottom: 14px; font-weight: 400; display: flex; justify-content: space-between; align-items: center; }
+  .panel h2 .meta { color: rgba(189,242,208,0.35); font-size: 9px; letter-spacing: 0.15em; }
   .panel-scroll { max-height: 460px; overflow-y: auto; }
   .panel-scroll::-webkit-scrollbar { width: 6px; }
   .panel-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -105,7 +110,29 @@
   /* network iframe */
   .map-panel { padding: 0; overflow: hidden; height: 540px; position: relative; }
   .map-panel iframe { width: 100%; height: 100%; border: none; background: #060f0a; }
-  .map-panel .ov { position: absolute; top: 14px; left: 14px; font-size: 9px; letter-spacing: 0.25em; color: rgba(70,176,107,0.85); text-transform: uppercase; pointer-events: none; }
+  .map-panel .ov { position: absolute; top: 14px; left: 14px; font-size: 9px; letter-spacing: 0.25em; color: rgba(70,176,107,0.85); text-transform: uppercase; pointer-events: none; background: rgba(6,15,10,0.6); padding: 4px 8px; border-radius: 4px; backdrop-filter: blur(6px); }
+
+  /* keywords panel — full width row */
+  .keys-row { background: #0e2016; border: 0.5px solid #1a3a28; border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+  .keys-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .keys-head h2 { font-size: 10px; letter-spacing: 0.25em; color: rgba(70,176,107,0.85); text-transform: uppercase; font-weight: 400; }
+  .keys-head .meta { font-size: 10px; color: rgba(189,242,208,0.4); letter-spacing: 0.05em; }
+  .keys-head .meta.custom { color: #ff8030; }
+  .keys-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 200px; overflow-y: auto; padding: 8px; background: #060f0a; border: 0.5px solid #1a3a28; border-radius: 6px; margin-bottom: 12px; }
+  .keys-list::-webkit-scrollbar { width: 6px; }
+  .keys-list::-webkit-scrollbar-thumb { background: #1a3a28; border-radius: 3px; }
+  .key-pill { background: #1a3a28; color: #bdf2d0; font-size: 11px; padding: 4px 6px 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+  .key-pill .x { cursor: pointer; color: rgba(255,128,48,0.7); padding: 0 4px; font-weight: 600; }
+  .key-pill .x:hover { color: #ff8030; }
+  .keys-add { display: flex; gap: 8px; flex-wrap: wrap; }
+  .keys-add input { flex: 1; min-width: 220px; background: #060f0a; color: #d6e8dc; border: 0.5px solid #2f6b45; padding: 10px 14px; font-family: inherit; font-size: 12px; border-radius: 5px; outline: none; }
+  .keys-add input:focus { border-color: #46b06b; }
+  .keys-add button { background: #2f6b45; color: #d6e8dc; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .keys-add button.primary { background: #46b06b; color: #060f0a; }
+  .keys-add button.danger { background: transparent; color: rgba(255,128,48,0.8); border: 0.5px solid rgba(255,128,48,0.4); }
+  .keys-add button:hover { background: #6fe49b; color: #060f0a; }
+  .keys-add button.danger:hover { background: rgba(255,128,48,0.15); color: #ff8030; border-color: #ff8030; }
+  .keys-status { font-size: 10px; color: rgba(189,242,208,0.5); margin-top: 10px; font-style: italic; min-height: 14px; }
 
   footer { font-size: 9px; color: rgba(214,232,220,0.25); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 24px; padding-top: 16px; border-top: 0.5px solid #1a3a28; display: flex; justify-content: space-between; }
   footer a { color: rgba(70,176,107,0.6); }
@@ -137,7 +164,7 @@
     <div class="meta">
       <span><span id="led" class="led idle"></span> <span id="led-text">idle</span></span>
       <span id="last-run">last run: —</span>
-      <span id="error-count" style="color:#ff8030;display:none;">⚠ <span id="err-num">0</span> hata</span>
+      <span id="error-count" style="color:#ff8030;display:none;">⚠ <span id="err-num">0</span> errors</span>
     </div>
   </header>
 
@@ -151,34 +178,53 @@
     <div class="console-label">◉ Boost dial — synthesis on demand</div>
     <div class="boost-row">
       <select class="boost-select" id="boost-type">
-        <option value="intersection">intersection · bir kesişim daha bul</option>
-        <option value="deep-dive">deep-dive · briefing yaz</option>
-        <option value="broadcast">broadcast · additive taslak</option>
-        <option value="network-write">network-write · topoloji yaz</option>
+        <option value="intersection">intersection · find one cross-domain pair</option>
+        <option value="deep-dive">deep-dive · package a briefing</option>
+        <option value="broadcast">broadcast · additive draft</option>
+        <option value="network-write">network-write · update topology</option>
       </select>
+      <input class="boost-topic" id="boost-topic" type="text" placeholder="optional · scope to one topic" autocomplete="off" />
       <button class="boost-btn" id="boost-fire">▶ B O O S T</button>
     </div>
+    <div class="console-help">
+      The topic field is optional. Leave it empty for a full-pool boost using everything Khashif has harvested. Fill it (e.g. <i>"NLnet grant landscape"</i>, <i>"music therapy + AI"</i>, <i>"breathwork research"</i>) to scope the boost to a single subject — keeps the resonance web clean and the report focused.
+    </div>
     <div class="console-aux">
-      <button class="aux-btn" id="aux-task">⛓ /task tetikle</button>
-      <button class="aux-btn" id="aux-network">↗ ağ haritası</button>
-      <button class="aux-btn" id="aux-intersections">↗ kesişimler</button>
+      <button class="aux-btn" id="aux-task">⛓ trigger /task</button>
+      <button class="aux-btn" id="aux-network">↗ network map</button>
+      <button class="aux-btn" id="aux-intersections">↗ intersections</button>
       <button class="aux-btn" id="aux-refresh">⟳ refresh</button>
     </div>
   </div>
 
+  <div class="keys-row">
+    <div class="keys-head">
+      <h2>Resonance keys</h2>
+      <span class="meta" id="keys-meta">loading…</span>
+    </div>
+    <div class="keys-list" id="keys-list"><span class="empty">loading…</span></div>
+    <div class="keys-add">
+      <input id="keys-input" type="text" placeholder="add a new keyword (e.g. ai music therapy)" autocomplete="off" />
+      <button id="keys-add" class="primary">Add</button>
+      <button id="keys-save">Save</button>
+      <button id="keys-reset" class="danger">Reset to defaults</button>
+    </div>
+    <div class="keys-status" id="keys-status"></div>
+  </div>
+
   <div class="grid">
     <div class="panel panel-scroll">
-      <h2>Kovalar — son 24 saat</h2>
-      <div id="buckets-body"><div class="empty">yükleniyor…</div></div>
+      <h2>Buckets <span class="meta">last 24 hours</span></h2>
+      <div id="buckets-body"><div class="empty">loading…</div></div>
     </div>
     <div class="panel map-panel">
-      <span class="ov">Ağ haritası</span>
+      <span class="ov">Network map</span>
       <iframe src="https://khashif.run/network/" loading="lazy"></iframe>
     </div>
   </div>
 
   <footer>
-    <span>khashif.run · operator room v0</span>
+    <span>khashif.run · operator room v0.1</span>
     <span><a href="/" >← landing</a> · <a href="/network/">network</a> · <a href="/intersections/">intersections</a></span>
   </footer>
 </div>
@@ -187,89 +233,109 @@
 <div id="modal">
   <div class="panel">
     <h2 id="modal-title">Boost prompt</h2>
-    <p class="hint">Bu prompt clipboard'a kopyalandı. Claude Code session'a yapıştır — boost orada koşar.</p>
+    <p class="hint">Prompt copied to clipboard. Paste it into a Claude Code session — the boost cycle runs there. Khashif's memory updates as it runs; this panel refreshes every minute.</p>
     <pre id="modal-pre"></pre>
     <div class="modal-actions">
-      <button id="modal-copy">Yeniden kopyala</button>
-      <button class="primary" id="modal-close">Tamam</button>
+      <button id="modal-copy">Copy again</button>
+      <button class="primary" id="modal-close">Done</button>
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  // SHA-256 hash of the passphrase. If you change the passphrase, regenerate.
-  // Default: "kaşif" (same passphrase as the old khashif.html dashboard had).
-  // Hash computed with: echo -n "kaşif" | shasum -a 256
-  // SHA-256 of "kaşif" (UTF-8). Plain "kasif" also accepted as fallback.
+  // SHA-256 hash of the passphrase. UTF-8 encoded.
+  // Default: "kaşif". Plain "kasif" also accepted as fallback.
   const PASS_HASH = "217d565c079fde9246221658cd0bf8bf6239f41963864843bdd89deb5bbc2984";
   const API_BASE = "https://khashif-agent.onrender.com";
-  const FLASK_KEY = "khashif2026"; // header X-Khashif-Key — same as before.
+  const FLASK_KEY = "khashif2026"; // header X-Khashif-Key.
 
-  // Boost prompt templates. Short on purpose — Claude Code session
-  // reads CLAUDE.md → BOOST PROTOCOL for the full 12-step protocol.
+  // Boost prompt templates. Short on purpose — the Claude Code session
+  // reads CLAUDE.md → BOOST PROTOCOL for the full 12-step protocol. Each
+  // template names the type + names the deliverable + points at the protocol.
+  // Optional {TOPIC} is injected when the topic field has a value; otherwise
+  // the placeholder is replaced with a "full pool" instruction.
   const PROMPTS = {
-    "intersection": `Boost cycle — tip: intersection.
+    "intersection": `Boost cycle — type: intersection.
 
-CLAUDE.md → BOOST PROTOCOL'deki 12-adımlık protokolü uygula:
-- memory.main'i Supabase'den oku (SUPABASE_SERVICE_ROLE_KEY .secrets.env'de)
-- learned_intersections'ı tara, label de-dup et
+Apply the 12-step protocol in CLAUDE.md → BOOST PROTOCOL:
+- Read memory.main from Supabase (SUPABASE_SERVICE_ROLE_KEY in .secrets.env)
+- Scan learned_intersections, de-dup by label
 - ≤8 WebSearch + ≤5 WebFetch
-- Dört hard rule (NOVELTY / MECHANISM / BUYER / WHY NOW) ile filtrele
-- Bir geçerse memory["intersections"]'a yaz + memory["learned_intersections"]'a label ekle
-- Eğer dış kapı açtıysan watched_threads'e ekle
-- Operatöre action gerektiriyorsa RTM Khashif list'e (id 51554660) task push'la, click-through URL'siyle
-- Türkçe paragraf rapor + URL listesi
+- Filter candidate with the four hard rules (NOVELTY / MECHANISM / BUYER / WHY NOW)
+- If one passes, write to memory["intersections"] + memory["learned_intersections"]
+- If a door is opened, register it in watched_threads
+- If action-bound, push an RTM task to Khashif list (id 51554660) with the click-through URL
+- Wrap with a paragraph summary in English + a markdown source list
 
-Bir intersection bul. Çöp varsa NONE de.`,
+{TOPIC}
 
-    "deep-dive": `Boost cycle — tip: deep-dive briefing.
+Find one intersection. If nothing genuine surfaces, reply NONE.`,
 
-Hedef: memory.buckets içinden score≥8 ve "deep":true olan bir item seç (operatör için en alakalı olanı), o item için copy-ready briefing yaz, memory["deep_queue"]'a append + cap 20.
+    "deep-dive": `Boost cycle — type: deep-dive briefing.
 
-- memory.main'i Supabase'den oku
-- buckets[INCOME] + buckets[INTERSECTION] + buckets[NETWORK]'ten "deep":true items'ı listele
-- Bir tane seç (mantıklı gerekçe ile)
-- Linkten WebFetch ile sayfayı al
-- Briefing yapısı: lead context, son durum (deadline, kabul kriterleri), Tagmac/Khashif/Echo için neden alakalı, önerilen sonraki hareket
-- memory["deep_queue"]'a yaz, [-20:] cap
-- Türkçe özet + briefing'in kopya hali
+Goal: pick one bucket item from memory with "deep":true and score≥8 (the most relevant for the operator), compose a copy-ready briefing, append to memory["deep_queue"] (cap 20).
 
-Briefing hangi item'a yazıldı, neden seçildi.`,
+- Read memory.main from Supabase
+- List deep:true items across INCOME + INTERSECTION + NETWORK buckets
+- Choose one, with a clear reason
+- WebFetch the page text
+- Briefing shape: lead context, current state (deadline, eligibility, what they want), why this matters for Tagmac / Khashif / Echo, the proposed next move
+- Write to memory["deep_queue"], cap to last 20
+- Paragraph summary in English + the briefing verbatim (copy-pasteable)
 
-    "broadcast": `Boost cycle — tip: broadcast draft.
+{TOPIC}
 
-Hedef: bu hafta yeni gelen resonant findings + Casa Caravan/Khashif CATALOG'undan additive bir broadcast taslağı yaz, memory["broadcast_queue"]'a append + cap 15.
+Name which item, why chosen.`,
 
-- memory.main'i oku
-- last_session items'ı + buckets'ın son 24h fresh items'ı tara
-- ADDITIVE RULE: her taslak tek başına değerli olmalı (faydalı/davetkar), ad olmamalı
-- Hangi kanal? (HN reply, Bluesky post, GitHub issue comment, blog yorum, Mastodon thread)
-- Draft yapısı: {type, where, draft, item, layer:"claude-boost"}
-- memory["broadcast_queue"]'a yaz
-- Eğer kanaldan dış kapı açıldıysa watched_threads'e ekle
-- Türkçe özet + taslağın tam metni
+    "broadcast": `Boost cycle — type: broadcast draft.
 
-Taslak nereye, neden uygun, hangi katalog item'ı işaret ediyor.`,
+Goal: from this week's fresh resonant findings + the Khashif / Casa Caravan CATALOG, compose one additive outward signal. Append to memory["broadcast_queue"] (cap 15).
 
-    "network-write": `Boost cycle — tip: network topology write.
+- Read memory.main
+- Scan last_session items + last 24h fresh items in buckets
+- ADDITIVE RULE: each draft must be worth posting on its own (genuinely useful or warm invitation), never an ad
+- Pick channel (HN reply, Bluesky post, GitHub issue comment, blog comment, Mastodon thread)
+- Draft shape: {type, where, draft, item, layer:"claude-boost"}
+- Write to memory["broadcast_queue"]
+- If a door is opened by sending, register it in watched_threads
+- Paragraph summary in English + the draft verbatim
 
-Hedef: Supabase "network" key row'una yeni topology yaz. Frontier-only kural (locked 25 May 2026 — bkz [[network-viz-frozen]]).
+{TOPIC}
 
-İki yöntem (biri veya ikisi):
-A) Khashif'in pool'unu kullan — buckets, learned_keywords, intersections, crawled_pages'tan node + edge seç
-B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes getir
+Name where, why fitting, which catalog item it points at.`,
 
-İlerlemen:
-- memory.main'i oku
-- Topology'yi compose et (nodes: feeds, content, intersections, domains; edges: resonance, intersection_pull, content↔content)
-- Var olan khashif.run/network/ formatına uygun JSON üret (network row'daki schema'ya bak)
-- Supabase'e POST/PATCH (key="network", value=json.dumps(...))
-- khashif.run/network/ ve khashif.run/intersections/ reload'la doğrula
-- Türkçe özet (kaç node, kaç edge, ne değişti)
+    "network-write": `Boost cycle — type: network topology write.
 
-Önemli: free-tier journey bu key'e dokunmuyor (khashif.py'da çağrı yorumda). Sen yazarsın, sen koruorsun.`,
+Goal: write a new topology to Supabase "network" row. Frontier-only rule (locked 25 May 2026 — see [[network-viz-frozen]]).
+
+Two methods (either, or both):
+A) Use Khashif's pool — pick nodes + edges from buckets, learned_keywords, intersections, crawled_pages
+B) Do your own WebSearch / WebFetch research — bring in nodes the substrate hasn't reached
+
+Steps:
+- Read memory.main
+- Compose the topology (nodes: feeds, content, intersections, domains; edges: resonance, intersection_pull, content↔content, domain bridges)
+- Produce JSON matching the current khashif.run/network/ schema (inspect the existing network row first)
+- POST/PATCH the Supabase "network" key with the service_role key
+- Reload khashif.run/network/ + khashif.run/intersections/ to verify
+- Paragraph summary in English (how many nodes, how many edges, what changed)
+
+{TOPIC}
+
+Important: the free-tier journey does not touch this key (khashif_network_viz.generate() stays commented in khashif.py). The frontier writes it, the frontier owns it.`,
   };
+
+  // Topic injection helper. When the topic field is empty, replace the
+  // {TOPIC} placeholder with a "use full pool" hint. When filled, scope
+  // the boost to that topic only — keeps the resonance web clean.
+  function applyTopic(template, topic) {
+    if (topic && topic.trim()) {
+      const t = topic.trim();
+      return template.replace("{TOPIC}", `Focus topic: ${t} — use ONLY pool entries / research relevant to this topic. Treat unrelated items as if they don't exist for this cycle. This keeps the resonance web clean — a separate boost for a separate subject.`);
+    }
+    return template.replace("{TOPIC}", `Scope: full pool — no topic filter. Use everything Khashif has harvested.`);
+  }
 
   // -------- gate --------
   async function sha256(s) {
@@ -296,14 +362,16 @@ B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes geti
     document.getElementById("gate").style.display = "none";
     document.getElementById("room").style.display = "block";
     refresh();
+    loadKeywords();
     setInterval(refresh, 60000); // every minute
   }
 
   // -------- API --------
-  async function api(path) {
+  async function api(path, opts) {
     try {
       const r = await fetch(`${API_BASE}${path}`, {
-        headers: { "X-Khashif-Key": FLASK_KEY },
+        ...opts,
+        headers: { "X-Khashif-Key": FLASK_KEY, ...(opts && opts.headers || {}) },
       });
       if (!r.ok) throw new Error(`${r.status}`);
       return await r.json();
@@ -314,7 +382,6 @@ B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes geti
   }
 
   async function refresh() {
-    // status + errors run in parallel; buckets is heavier so we wait for it
     const [status, errs, buckets] = await Promise.all([
       api(`/status?key=${FLASK_KEY}`),
       api(`/errors?key=${FLASK_KEY}`),
@@ -332,23 +399,21 @@ B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes geti
         led.className = "led idle";
         ledText.textContent = "idle";
       }
-      document.getElementById("last-run").textContent = "last run: " + (status.last_run ? new Date(status.last_run).toLocaleString("tr-TR") : "—");
+      document.getElementById("last-run").textContent = "last run: " + (status.last_run ? new Date(status.last_run).toLocaleString("en-GB") : "—");
     }
     if (errs && errs.errors && errs.errors.length > 0) {
       document.getElementById("error-count").style.display = "inline";
       document.getElementById("err-num").textContent = errs.errors.length;
       document.getElementById("led").classList.add("err");
+    } else {
+      document.getElementById("error-count").style.display = "none";
+      document.getElementById("led").classList.remove("err");
     }
 
-    // stats
     if (buckets && buckets.buckets) {
       document.getElementById("stat-income").textContent = (buckets.buckets.INCOME || []).length;
       document.getElementById("stat-intersection").textContent = (buckets.buckets.INTERSECTION || []).length;
       document.getElementById("stat-network").textContent = (buckets.buckets.NETWORK || []).length;
-    }
-
-    // buckets body
-    if (buckets && buckets.buckets) {
       renderBuckets(buckets.buckets);
     }
   }
@@ -361,7 +426,6 @@ B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes geti
     let anything = false;
     for (const name of NAMES) {
       const items = (b[name] || []).filter(it => {
-        // dd.MM.yyyy HH:mm — best-effort parse
         const d = it.date || "";
         const m = d.match(/(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})/);
         if (!m) return true;
@@ -379,27 +443,129 @@ B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes geti
         html += `<div class="item"><div><span class="it-score">[${score}]</span> <a class="it-title" href="${link}" target="_blank" rel="noopener">${escapeHtml(title)}</a></div>${note ? `<div class="it-note">${escapeHtml(note)}</div>` : ""}</div>`;
       }
     }
-    body.innerHTML = anything ? html : '<div class="empty">son 24 saatte yeni bir şey çıkmadı.</div>';
+    body.innerHTML = anything ? html : '<div class="empty">Nothing new in the last 24 hours.</div>';
   }
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
 
+  // -------- keywords --------
+  // Local working copy of the resonance key list. Only persists when
+  // the operator hits Save (PATCH /keywords). Add and × act locally.
+  let workingKeywords = [];
+  let isCustom = false;
+  let defaultCount = 0;
+
+  async function loadKeywords() {
+    const data = await api(`/keywords?key=${FLASK_KEY}`);
+    if (!data || !data.keywords) {
+      document.getElementById("keys-meta").textContent = "failed to load";
+      document.getElementById("keys-list").innerHTML = '<span class="empty">load failed</span>';
+      return;
+    }
+    workingKeywords = [...data.keywords];
+    isCustom = !!data.is_custom;
+    defaultCount = data.default_count || 0;
+    renderKeywords();
+  }
+
+  function renderKeywords() {
+    const list = document.getElementById("keys-list");
+    const meta = document.getElementById("keys-meta");
+    meta.textContent = isCustom
+      ? `${workingKeywords.length} keys · operator-managed · default ${defaultCount}`
+      : `${workingKeywords.length} keys · default set`;
+    meta.classList.toggle("custom", isCustom);
+    if (!workingKeywords.length) {
+      list.innerHTML = '<span class="empty">no keywords</span>';
+      return;
+    }
+    list.innerHTML = workingKeywords.map((k, i) =>
+      `<span class="key-pill">${escapeHtml(k)}<span class="x" data-i="${i}">×</span></span>`
+    ).join("");
+    list.querySelectorAll(".x").forEach(el => {
+      el.addEventListener("click", () => {
+        const i = parseInt(el.dataset.i, 10);
+        workingKeywords.splice(i, 1);
+        renderKeywords();
+        setStatus("removed locally — Save to persist", "muted");
+      });
+    });
+  }
+
+  function setStatus(text, kind) {
+    const el = document.getElementById("keys-status");
+    el.textContent = text || "";
+    el.style.color = kind === "ok" ? "#46b06b" : kind === "err" ? "#ff8030" : "rgba(189,242,208,0.5)";
+  }
+
+  document.getElementById("keys-add").addEventListener("click", () => {
+    const inp = document.getElementById("keys-input");
+    const v = inp.value.trim().toLowerCase();
+    if (!v) return;
+    if (workingKeywords.includes(v)) {
+      setStatus(`"${v}" already in list`, "muted");
+    } else {
+      workingKeywords.push(v);
+      renderKeywords();
+      setStatus("added locally — Save to persist", "muted");
+    }
+    inp.value = "";
+    inp.focus();
+  });
+  document.getElementById("keys-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("keys-add").click();
+  });
+
+  document.getElementById("keys-save").addEventListener("click", async () => {
+    setStatus("saving…");
+    const r = await api(`/keywords?key=${FLASK_KEY}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keywords: workingKeywords }),
+    });
+    if (r && r.ok) {
+      setStatus(`saved · ${r.count} keys · next journey uses this list`, "ok");
+      isCustom = !r.reset_to_defaults;
+      renderKeywords();
+    } else {
+      setStatus("save failed — check console", "err");
+    }
+  });
+
+  document.getElementById("keys-reset").addEventListener("click", async () => {
+    if (!confirm("Reset to default keyword list? Your custom list will be replaced (defaults will load).")) return;
+    setStatus("resetting…");
+    const r = await api(`/keywords?key=${FLASK_KEY}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keywords: [] }),
+    });
+    if (r && r.ok) {
+      setStatus("reset · loading defaults", "ok");
+      await loadKeywords();
+    } else {
+      setStatus("reset failed — check console", "err");
+    }
+  });
+
   // -------- boost button --------
   const modal = document.getElementById("modal");
   const modalPre = document.getElementById("modal-pre");
   const modalTitle = document.getElementById("modal-title");
   function openBoost(type) {
-    const prompt = PROMPTS[type] || PROMPTS.intersection;
-    modalTitle.textContent = `Boost prompt — ${type}`;
+    const topic = document.getElementById("boost-topic").value;
+    const prompt = applyTopic(PROMPTS[type] || PROMPTS.intersection, topic);
+    modalTitle.textContent = topic.trim()
+      ? `Boost prompt — ${type} · scope: ${topic.trim()}`
+      : `Boost prompt — ${type} · full pool`;
     modalPre.textContent = prompt;
     modal.style.display = "flex";
     copyToClipboard(prompt);
   }
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).catch(() => {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = text; document.body.appendChild(ta);
       ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
@@ -416,19 +582,19 @@ B) Kendi WebSearch / WebFetch araştırmanı yap — pool dışından nodes geti
   document.getElementById("aux-task").addEventListener("click", async () => {
     const btn = document.getElementById("aux-task");
     const old = btn.textContent;
-    btn.textContent = "tetikliyor…"; btn.disabled = true;
+    btn.textContent = "triggering…"; btn.disabled = true;
     try {
       const r = await fetch(`${API_BASE}/task`, { method: "POST", headers: { "X-Khashif-Key": FLASK_KEY } });
       const j = await r.json();
-      btn.textContent = j.status === "started" ? "✓ tetiklendi" : (j.status || "?");
+      btn.textContent = j.status === "started" ? "✓ triggered" : (j.status || "?");
     } catch (e) {
-      btn.textContent = "✗ hata";
+      btn.textContent = "✗ error";
     }
     setTimeout(() => { btn.textContent = old; btn.disabled = false; refresh(); }, 2500);
   });
   document.getElementById("aux-network").addEventListener("click", () => { window.open("/network/", "_blank"); });
   document.getElementById("aux-intersections").addEventListener("click", () => { window.open("/intersections/", "_blank"); });
-  document.getElementById("aux-refresh").addEventListener("click", refresh);
+  document.getElementById("aux-refresh").addEventListener("click", () => { refresh(); loadKeywords(); });
 })();
 </script>
 </body>
