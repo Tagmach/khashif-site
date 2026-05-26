@@ -134,6 +134,27 @@
   .keys-add button.danger:hover { background: rgba(255,128,48,0.15); color: #ff8030; border-color: #ff8030; }
   .keys-status { font-size: 10px; color: rgba(189,242,208,0.5); margin-top: 10px; font-style: italic; min-height: 14px; }
 
+  /* News board — full-width below the buckets/map grid. The "blood
+     circulation" channel: mechanical RSS harvest of agent/frontier
+     ecosystem signals, surfaced as clickable headlines. */
+  .news-row { background: #0e2016; border: 0.5px solid #1a3a28; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; }
+  .news-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .news-head h2 { font-size: 10px; letter-spacing: 0.25em; color: rgba(70,176,107,0.85); text-transform: uppercase; font-weight: 400; }
+  .news-head .meta { font-size: 10px; color: rgba(189,242,208,0.4); letter-spacing: 0.05em; }
+  .news-list { max-height: 520px; overflow-y: auto; padding-right: 6px; }
+  .news-list::-webkit-scrollbar { width: 6px; }
+  .news-list::-webkit-scrollbar-track { background: transparent; }
+  .news-list::-webkit-scrollbar-thumb { background: #1a3a28; border-radius: 3px; }
+  .news-item { padding: 10px 0; border-bottom: 0.5px solid rgba(26,58,40,0.5); display: flex; gap: 12px; align-items: flex-start; }
+  .news-item:last-child { border-bottom: none; }
+  .news-item .source-pill { flex-shrink: 0; font-size: 9px; letter-spacing: 0.1em; color: #bdf2d0; background: rgba(70,176,107,0.12); border: 0.5px solid rgba(70,176,107,0.3); padding: 3px 8px; border-radius: 12px; text-transform: lowercase; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+  .news-item .news-body { flex: 1; min-width: 0; }
+  .news-item .news-title { font-size: 12px; color: #d6e8dc; line-height: 1.5; }
+  .news-item .news-title a { color: #d6e8dc; text-decoration: none; border-bottom: 0.5px solid transparent; transition: border-color 0.15s; }
+  .news-item .news-title a:hover { color: #6fe49b; border-bottom-color: rgba(111,228,155,0.5); }
+  .news-item .news-meta-row { font-size: 10px; color: rgba(189,242,208,0.4); margin-top: 4px; }
+  .news-item .news-summary { font-size: 10px; color: rgba(189,242,208,0.45); margin-top: 4px; line-height: 1.5; }
+
   footer { font-size: 9px; color: rgba(214,232,220,0.25); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 24px; padding-top: 16px; border-top: 0.5px solid #1a3a28; display: flex; justify-content: space-between; }
   footer a { color: rgba(70,176,107,0.6); }
 
@@ -223,8 +244,18 @@
     </div>
   </div>
 
+  <div class="news-row">
+    <div class="news-head">
+      <h2>News · agent / frontier feed</h2>
+      <span class="meta" id="news-meta">loading…</span>
+    </div>
+    <div class="news-list" id="news-list">
+      <div class="empty">loading…</div>
+    </div>
+  </div>
+
   <footer>
-    <span>khashif.run · operator room v0.1</span>
+    <span>khashif.run · operator room v0.2</span>
     <span><a href="/" >← landing</a> · <a href="/network/">network</a> · <a href="/intersections/">intersections</a></span>
   </footer>
 </div>
@@ -363,7 +394,9 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
     document.getElementById("room").style.display = "block";
     refresh();
     loadKeywords();
+    loadNews();
     setInterval(refresh, 60000); // every minute
+    setInterval(loadNews, 60000); // news also refreshes minute-by-minute
   }
 
   // -------- API --------
@@ -550,6 +583,62 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
     }
   });
 
+  // -------- news board --------
+  // Renders memory["news_feed"] as a list of clickable headlines.
+  // Each item: source pill · time-ago · clickable title · summary.
+  async function loadNews() {
+    const data = await api(`/news?key=${FLASK_KEY}`);
+    const list = document.getElementById("news-list");
+    const meta = document.getElementById("news-meta");
+    if (!data || !data.ok || !Array.isArray(data.items)) {
+      meta.textContent = "feed unavailable";
+      list.innerHTML = '<div class="empty">news feed couldn\'t load — try refresh, or wait for the next journey.</div>';
+      return;
+    }
+    if (!data.items.length) {
+      meta.textContent = "no items yet · runs every journey";
+      list.innerHTML = '<div class="empty">No news harvested yet. Trigger a journey or wait for the next cron tick.</div>';
+      return;
+    }
+    meta.textContent = `${data.items.length} shown · ${data.total} total · auto-refresh 1m`;
+    list.innerHTML = data.items.map(it => {
+      const source = escapeHtml((it.source || "").substring(0, 32));
+      const title = escapeHtml((it.title || "").substring(0, 200));
+      const link = escapeHtml(it.link || "#");
+      const summary = it.summary ? escapeHtml(it.summary.substring(0, 200)) : "";
+      const ago = timeAgo(it.at_iso || it.at);
+      return `
+        <div class="news-item">
+          <span class="source-pill">${source}</span>
+          <div class="news-body">
+            <div class="news-title"><a href="${link}" target="_blank" rel="noopener">${title}</a></div>
+            <div class="news-meta-row">${ago}</div>
+            ${summary ? `<div class="news-summary">${summary}</div>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return "—";
+    let t = null;
+    // Accept ISO-8601 or "dd.MM.yyyy HH:mm" format.
+    const m = String(iso).match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/);
+    if (m) {
+      t = new Date(`${m[3]}-${m[2]}-${m[1]}T${m[4]}:${m[5]}:00`).getTime();
+    } else {
+      t = new Date(iso).getTime();
+    }
+    if (!t || isNaN(t)) return String(iso);
+    const diff = (Date.now() - t) / 1000; // seconds
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    if (diff < 86400 * 7) return Math.floor(diff / 86400) + "d ago";
+    if (diff < 86400 * 30) return Math.floor(diff / (86400 * 7)) + "w ago";
+    return Math.floor(diff / 86400) + "d ago";
+  }
+
   // -------- boost button --------
   const modal = document.getElementById("modal");
   const modalPre = document.getElementById("modal-pre");
@@ -594,7 +683,7 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
   });
   document.getElementById("aux-network").addEventListener("click", () => { window.open("/network/", "_blank"); });
   document.getElementById("aux-intersections").addEventListener("click", () => { window.open("/intersections/", "_blank"); });
-  document.getElementById("aux-refresh").addEventListener("click", () => { refresh(); loadKeywords(); });
+  document.getElementById("aux-refresh").addEventListener("click", () => { refresh(); loadKeywords(); loadNews(); });
 })();
 </script>
 </body>
