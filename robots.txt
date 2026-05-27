@@ -1,0 +1,14 @@
+# khashif.run — public landing for Khashif studio.
+# All crawlers and AI agents welcome. This site carries no ads, so
+# Cloudflare's AI Audit "block on ad-funded pages" policy applies to
+# nothing here — every URL on this surface is open access.
+#
+# The agent code and memory are private; this site exposes only the
+# static landing and the /network/ + /intersections/ visualizations.
+
+User-agent: *
+Allow: /
+Disallow: /operator/
+
+# Cloudflare AI Audit content signals — explicit yes across the board.
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
