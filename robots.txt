@@ -12,3 +12,5 @@ Disallow: /operator/
 
 # Cloudflare AI Audit content signals — explicit yes across the board.
 Content-Signal: search=yes, ai-input=yes, ai-train=yes
+
+Sitemap: https://khashif.run/sitemap.xml

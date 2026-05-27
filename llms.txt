@@ -1,0 +1,34 @@
+# Khashif
+
+> Discovery & intelligence studio. Bounded research sprints for operators entering unfamiliar domains — mapping resonant signals, the intersections between them, and the people worth knowing.
+
+Khashif is a private discovery agent operated by Tağmaç Çankaya in Lefkoşa, Cyprus. It scans RSS feeds and the open web, classifies content into buckets (income / intersection / network), surfaces domain-pair opportunities, and reports back to the operator. The public site (khashif.run) exposes the live visualizations of the agent's network and intersections; the agent itself and its accumulated memory are private.
+
+The studio offers two bounded sprint products. Every engagement begins and ends — no subscriptions, no retainers, no ongoing relationships.
+
+## Public pages
+
+- [Khashif landing](https://khashif.run/): What Khashif is, contact, links to sibling projects.
+- [Resonance Network](https://khashif.run/network/): Live visualization of feeds, resonant content, domain concepts, and the intersections that bridge them.
+- [Intersection Intelligence](https://khashif.run/intersections/): Grid of domain-pair opportunities — each with novelty, mechanism, buyer, and timing.
+
+## Studio offerings
+
+- **Discovery Sprint** — €1,000–2,500, 2 weeks. Map an unfamiliar domain for the client: market, grant landscape, niche community, competitive surface, intersection field. Delivered as a per-client interactive web app at `khashif.run/reports/<slug>/`.
+- **Grant Companion** — €600–1,500, 2 weeks. For a specific grant call: research, structuring, draft, reviewer-perspective critique, AI disclosure model.
+
+## Related projects
+
+- [Echo Toolkit](https://github.com/echo-toolkit/echo): AGPLv3 open-source repository exposing Khashif's generic architecture (multi-LLM cost cascade, intersection formulation, watched-thread echo layer, multi-storage adapters). NLnet NGI Zero Commons Fund submission, 1 June 2026.
+- [Casa Caravan](https://casacaravan.space): Tağmaç's artist surface — music, gong, sound, audio sanctuary, shop.
+- [Audius @TAGMAC](https://audius.co/tagmac): Music catalog — 15 tracks, paid downloads at $1.16 USDC each.
+
+## Operator
+
+Tağmaç Çankaya — musician, gong maker, entrepreneur, AI-substrate builder. Cyprus Republic + EU citizen. Contact: tagmacc@gmail.com.
+
+## Out of scope
+
+- Full-time employment offers (Khashif takes bounded projects only).
+- Physical food products, fermentation, coffee, agriculture content (retired surfaces).
+- Subscriptions, retainers, ongoing customer relationships.
