@@ -14,8 +14,8 @@ The studio offers two bounded sprint products. Every engagement begins and ends 
 
 ## Studio offerings
 
-- **Discovery Sprint** — €1,000–2,500, 2 weeks. Map an unfamiliar domain for the client: market, grant landscape, niche community, competitive surface, intersection field. Delivered as a per-client interactive web app at `khashif.run/reports/<slug>/`.
-- **Grant Companion** — €600–1,500, 2 weeks. For a specific grant call: research, structuring, draft, reviewer-perspective critique, AI disclosure model.
+- **Discovery Sprint** — starting at €500 (founding-customer rate; ramps to €2,500 with proof), 2 weeks. Map an unfamiliar domain for the client: market, grant landscape, niche community, competitive surface, intersection field. Delivered as a per-client interactive web app at `khashif.run/reports/<slug>/`.
+- **Grant Companion** — starting at €300 (founding-customer rate; ramps to €1,500 with proof), 2 weeks. For a specific grant call: research, structuring, draft, reviewer-perspective critique, AI disclosure model.
 
 ## Related projects
 
