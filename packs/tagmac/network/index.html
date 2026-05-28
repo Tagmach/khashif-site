@@ -164,9 +164,10 @@
 <script>
 // Pack maps read their network row through the backend /packnet/<slug>
 // endpoint — service-role bypasses anon RLS (which only allows reads
-// on the main 'network' row). This keeps pack maps live without
-// loosening Supabase policies. See app.py /packnet route.
-const PACK_NETWORK_URL = "https://khashif-agent.onrender.com/packnet/pack_tagmac";
+// on the main 'network' row). Routed via CF Pages Functions same-origin
+// proxy (functions/packnet/[slug].js) to bypass ad blockers that
+// classify *.onrender.com as a tracker host (ERR_BLOCKED_BY_CLIENT).
+const PACK_NETWORK_URL = "/packnet/pack_tagmac";
 
 let NODES = [];
 let EDGES = [];
