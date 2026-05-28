@@ -136,9 +136,9 @@
         <div>
           <div class="topic-panel">
             <div class="panel-title">topic</div>
-            <div class="topic-row"><div class="lbl">konu</div><div class="val" id="topic-konu">—</div></div>
-            <div class="topic-row"><div class="lbl">amaç</div><div class="val" id="topic-amac">—</div></div>
-            <div class="topic-row"><div class="lbl">kaynaklar</div><div class="val" id="topic-kaynaklar">—</div></div>
+            <div class="topic-row"><div class="lbl">topic</div><div class="val" id="topic-name">—</div></div>
+            <div class="topic-row"><div class="lbl">goal</div><div class="val" id="topic-goal">—</div></div>
+            <div class="topic-row"><div class="lbl">sources</div><div class="val" id="topic-sources">—</div></div>
             <div class="topic-row"><div class="lbl">created · last update</div><div class="val" id="topic-times" style="font-size:10px;color:rgba(189,242,208,0.55);">—</div></div>
           </div>
 
@@ -220,14 +220,15 @@ function escapeHtml(s) {
 function render(data) {
   const meta = data.meta || {};
   document.getElementById('partition-label').textContent = 'partition: ' + data.slug;
-  document.getElementById('topic-konu').textContent = meta.konu || '—';
-  document.getElementById('topic-amac').textContent = meta.amac || '—';
-  const kaynaklarHtml = (meta.kaynaklar || []).length
-    ? meta.kaynaklar.map(k => k.startsWith('http')
-        ? '<a href="' + escapeHtml(k) + '" target="_blank" rel="noopener">' + escapeHtml(k) + '</a>'
-        : escapeHtml(k)).join('<br>')
+  document.getElementById('topic-name').textContent = meta.topic || meta.konu || '—';
+  document.getElementById('topic-goal').textContent = meta.goal || meta.amac || '—';
+  const sourcesArr = meta.sources || meta.kaynaklar || [];
+  const sourcesHtml = sourcesArr.length
+    ? sourcesArr.map(s => s.startsWith('http')
+        ? '<a href="' + escapeHtml(s) + '" target="_blank" rel="noopener">' + escapeHtml(s) + '</a>'
+        : escapeHtml(s)).join('<br>')
     : '—';
-  document.getElementById('topic-kaynaklar').innerHTML = kaynaklarHtml;
+  document.getElementById('topic-sources').innerHTML = sourcesHtml;
   document.getElementById('topic-times').textContent =
     (meta.created_at ? new Date(meta.created_at).toLocaleString() : '—') +
     ' · ' + (data.updated_at ? new Date(data.updated_at).toLocaleString() : '—');
@@ -303,7 +304,7 @@ After the write succeeds, refresh https://khashif.run/research/?slug=<SLUG>
 
 const CYCLE_PROMPTS = {
   1: {
-    role: 'keşif',
+    role: 'reconnaissance',
     intro: `You are running CYCLE 1 (KEŞİF / reconnaissance) of a Khashif
 Topic Research run. This cycle's job is to identify the AXES of the
 topic — the main dimensions an outreach strategy must address.`,
@@ -319,7 +320,7 @@ Apply the 4 hard rules: every axis must NOVELTY / MECHANISM / BUYER /
 WHY NOW. Drop axes that fail any rule.`,
     schema: `## Artifact schema (write to cycles[0])
 {
-  "role": "keşif",
+  "role": "reconnaissance",
   "axes": [
     { "name": "...", "finding": "1 paragraph", "sources": ["url1", "url2"] },
     ...
@@ -384,8 +385,8 @@ Example shape: "<topic axis> × <resonance domain> = <new reach>".
 
 Produce 2-4 intersections, each passing the 4 hard rules. Each
 intersection should suggest a CONCRETE next move (not just "explore").
-This is the *su + un = ekmek* primitive — two ingredients producing
-a new offering.`,
+This is the water + flour = bread primitive — two ingredients
+producing a new offering.`,
     schema: `## Artifact schema (write to cycles[3] AND memory.intersections[])
 {
   "role": "intersect",
@@ -467,9 +468,9 @@ function buildPrompt(cycleN) {
   const slugStr = STATE.slug;
 
   const ctxBlock = `## Topic context
-- konu:      ${meta.konu || '—'}
-- amaç:      ${meta.amac || '—'}
-- kaynaklar: ${(meta.kaynaklar || []).join(', ') || '—'}
+- topic:     ${meta.topic || meta.konu || '—'}
+- goal:      ${meta.goal || meta.amac || '—'}
+- sources:   ${(meta.sources || meta.kaynaklar || []).join(', ') || '—'}
 - slug:      ${slugStr}
 - partition: topic_${slugStr}`;
 
@@ -498,9 +499,9 @@ function buildPrompt(cycleN) {
     '',
     SUPABASE_WRITE.replace(/<SLUG>/g, slugStr),
     '',
-    `When the partition write succeeds, report briefly to the operator
-in Turkish: what was found, what surprised, what the next cycle should
-focus on. Then stop. Do NOT auto-run other cycles.`,
+    `When the partition write succeeds, report briefly to the operator:
+what was found, what surprised, what the next cycle should focus on.
+Then stop. Do NOT auto-run other cycles.`,
   ].join('\n');
 }
 

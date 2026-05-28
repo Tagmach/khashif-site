@@ -626,7 +626,7 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
       }
       meta.textContent = `${data.count} topic${data.count === 1 ? '' : 's'} · auto-refresh 1m`;
       list.innerHTML = data.topics.map(t => {
-        const konu = escapeHtml((t.konu || "").substring(0, 100));
+        const title = escapeHtml((t.topic || t.konu || "").substring(0, 100));
         const slug = encodeURIComponent(t.slug);
         const done = t.cycles_done || 0;
         const planned = t.cycles_planned || 5;
@@ -639,7 +639,7 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
           <div class="news-item">
             <span class="source-pill">${progress}</span>
             <div class="news-body">
-              <div class="news-title"><a href="/research/?slug=${slug}">${konu}</a>${reportBadge}</div>
+              <div class="news-title"><a href="/research/?slug=${slug}">${title}</a>${reportBadge}</div>
               <div class="news-meta-row">${ago} · slug: ${escapeHtml(t.slug)}</div>
             </div>
           </div>`;

@@ -74,14 +74,14 @@
     </div>
 
     <form id="form">
-      <label>konu <span class="hint">topic / subject — what to research</span></label>
-      <input type="text" id="konu" required maxlength="200" placeholder="e.g. Cyprus RIF PRE-SEED grant landscape">
+      <label>topic <span class="hint">subject of the research</span></label>
+      <input type="text" id="topic" required maxlength="200" placeholder="e.g. Cyprus RIF PRE-SEED grant landscape">
 
-      <label>amaç <span class="hint">goal — what should this research enable</span></label>
-      <textarea id="amac" required maxlength="500" placeholder="e.g. NLnet sonrası RIF PRE-SEED başvurusu için eligibility map + reuse stratejisi + ekosistem partner haritası"></textarea>
+      <label>goal <span class="hint">what should this research enable</span></label>
+      <textarea id="goal" required maxlength="500" placeholder="e.g. eligibility map + reuse strategy + ecosystem partner map for RIF PRE-SEED application"></textarea>
 
-      <label>kaynaklar <span class="hint">known sources, comma-separated — optional</span></label>
-      <textarea id="kaynaklar" maxlength="1000" placeholder="https://research.org.cy, https://...
+      <label>sources <span class="hint">known starting points, comma-separated — optional</span></label>
+      <textarea id="sources" maxlength="1000" placeholder="https://research.org.cy, https://...
 "></textarea>
 
       <div class="actions">
@@ -99,15 +99,15 @@ const btn = document.getElementById('submit');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const konu = document.getElementById('konu').value.trim();
-  const amac = document.getElementById('amac').value.trim();
-  const kaynaklarRaw = document.getElementById('kaynaklar').value.trim();
-  const kaynaklar = kaynaklarRaw
-    ? kaynaklarRaw.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
+  const topic = document.getElementById('topic').value.trim();
+  const goal = document.getElementById('goal').value.trim();
+  const sourcesRaw = document.getElementById('sources').value.trim();
+  const sources = sourcesRaw
+    ? sourcesRaw.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
     : [];
 
-  if (!konu || konu.length < 3) { status.textContent = 'konu en az 3 karakter olmalı.'; return; }
-  if (!amac || amac.length < 3) { status.textContent = 'amaç en az 3 karakter olmalı.'; return; }
+  if (!topic || topic.length < 3) { status.textContent = 'topic must be at least 3 characters.'; return; }
+  if (!goal || goal.length < 3) { status.textContent = 'goal must be at least 3 characters.'; return; }
 
   btn.disabled = true;
   status.classList.remove('ok');
@@ -116,7 +116,7 @@ form.addEventListener('submit', async (e) => {
     const res = await fetch('/api/research', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Khashif-Key': 'khashif2026' },
-      body: JSON.stringify({ konu, amac, kaynaklar }),
+      body: JSON.stringify({ topic, goal, sources }),
     });
     const data = await res.json();
     if (!res.ok) {
