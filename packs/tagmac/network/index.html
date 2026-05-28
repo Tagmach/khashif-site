@@ -114,12 +114,13 @@
   <button id="fs-btn" title="Fullscreen (F)">⛶ fullscreen</button>
   <div id="legend" class="panel">
     <div class="leg"><div class="leg-dot" style="background:#46b06b;box-shadow:0 0 6px rgba(70,176,107,0.6);"></div>Tagmac · center</div>
-    <div class="leg"><div class="leg-dot" style="background:#2f6b45;"></div>priority source</div>
-    <div class="leg"><div class="leg-dot" style="background:#6fe49b;"></div>dynamic feed (crawl)</div>
-    <div class="leg"><div class="leg-dot" style="background:#bdf2d0;"></div>resonant content</div>
-    <div class="leg"><div class="leg-dot" style="background:#1a3a28;border:1px solid #2f6b45;"></div>domain concept</div>
-    <div class="leg"><div class="leg-dot" style="background:#46b06b;border:1.5px solid #6fe49b;box-shadow:0 0 6px rgba(111,228,155,0.7);"></div>intersection (water+flour=bread)</div>
-    <div class="leg"><div class="leg-dot" style="background:#ffffff;box-shadow:0 0 5px #fff;"></div>action item</div>
+    <div class="leg"><div class="leg-dot" style="background:#6fe49b;box-shadow:0 0 5px rgba(111,228,155,0.65);"></div>owned surface (github / audius / casacaravan / khashif)</div>
+    <div class="leg"><div class="leg-dot" style="background:#46b06b;"></div>code (github org / other)</div>
+    <div class="leg"><div class="leg-dot" style="background:#bdf2d0;"></div>music platform</div>
+    <div class="leg"><div class="leg-dot" style="background:#bdf2d0;border:1px solid #2f6b45;"></div>video platform</div>
+    <div class="leg"><div class="leg-dot" style="background:#2f6b45;"></div>social / blog</div>
+    <div class="leg"><div class="leg-dot" style="background:#ff8030;"></div>press / interview</div>
+    <div class="leg"><div class="leg-dot" style="background:#1a3a28;border:1px solid #2f6b45;"></div>mention / directory</div>
   </div>
   <div id="info" class="panel">person-anchored: Tagmac Cankaya<br>memory partition: pack_tagmac<br>main network untouched</div>
   <div id="diag" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#6fe49b;text-align:center;font-family:monospace;">BOOT · loading network data…</div>
@@ -245,12 +246,22 @@ function initPositions() {
   const sources = NODES.filter(n => n.type !== 'center' && n.type !== 'content');
   sources.forEach((n, i) => {
     const angle = (i / sources.length) * Math.PI * 2;
-    // Type-aware orbit radii (using current type names, not stale priority/extended)
-    const dist = n.type === 'seed' ? 160
-              : n.type === 'dynamic' ? 230
-              : n.type === 'domain' ? 220
-              : n.type === 'intersection' ? 280
-              : 190;
+    // Type-aware orbit radii. Owned surfaces hug close to Tagmac;
+    // mentions / press / unknown drift further out.
+    const dist =
+        (n.type === 'owned_code' || n.type === 'owned_music' || n.type === 'owned_site') ? 130
+      : n.type === 'code' || n.type === 'music' ? 180
+      : n.type === 'social' || n.type === 'blog' || n.type === 'video' ? 220
+      : n.type === 'press' ? 250
+      : n.type === 'directory' ? 240
+      : n.type === 'mention' ? 290
+      : n.type === 'unknown' ? 290
+      // Legacy types
+      : n.type === 'seed' ? 160
+      : n.type === 'dynamic' ? 230
+      : n.type === 'domain' ? 220
+      : n.type === 'intersection' ? 280
+      : 190;
     n.x = W/2 + Math.cos(angle) * dist + (Math.random()-0.5)*30;
     n.y = H/2 + Math.sin(angle) * dist + (Math.random()-0.5)*30;
     n.vx = 0; n.vy = 0;
@@ -275,27 +286,43 @@ function initPositions() {
 
 function sizeOf(n) {
   if (n.type === 'center') return 22;
+  // Footprint types (Personal Pack)
+  if (n.type === 'owned_code' || n.type === 'owned_music' || n.type === 'owned_site') return 15;
+  if (n.type === 'code' || n.type === 'music' || n.type === 'press') return 11;
+  if (n.type === 'social' || n.type === 'blog' || n.type === 'video') return 9;
+  if (n.type === 'directory' || n.type === 'mention' || n.type === 'unknown') return 7;
+  // Legacy discovery types
   if (n.type === 'seed') return 12 + Math.min(n.connections * 0.8, 6);
   if (n.type === 'dynamic') return 8;
   if (n.type === 'domain') return 7 + Math.min((n.connections || 1) * 0.6, 5);
   if (n.type === 'intersection') {
-    // weight = count × avg_strength; recurring weighty pairs grow bigger
     const w = parseFloat(n.weight) || 2;
     return 10 + Math.min(w * 0.8, 14);
   }
-  // content (resonant items)
   const s = parseFloat(n.score) || 5;
   return 4 + s * 0.4;
 }
 
 function colorOf(n) {
   if (n.action && ['COMMENT','SUBMIT','ATTEND'].includes(n.action)) return '#ffffff';
-  if (n.type === 'center')       return '#46b06b';   // SIGNAL — the call
-  if (n.type === 'seed')         return '#2f6b45';   // GROVE — established priority sources
-  if (n.type === 'dynamic')      return '#6fe49b';   // PULSE — newly discovered
-  if (n.type === 'domain')       return '#1a3a28';   // MOSS — domain concept anchors
-  if (n.type === 'intersection') return '#46b06b';   // SIGNAL with halo (see draw())
-  return '#bdf2d0';                                  // ECHO — returning resonance (content)
+  if (n.type === 'center')       return '#46b06b';
+  // Footprint types — operator's owned surfaces glow brighter
+  if (n.type === 'owned_code' || n.type === 'owned_music' || n.type === 'owned_site') return '#6fe49b';  // PULSE
+  if (n.type === 'code')         return '#46b06b';   // SIGNAL — code
+  if (n.type === 'music')        return '#bdf2d0';   // ECHO — music platform
+  if (n.type === 'video')        return '#bdf2d0';
+  if (n.type === 'social')       return '#2f6b45';   // GROVE — social/blog
+  if (n.type === 'blog')         return '#2f6b45';
+  if (n.type === 'press')        return '#ff8030';   // ignition orange — press / interview
+  if (n.type === 'directory')    return '#1a3a28';   // MOSS
+  if (n.type === 'mention')      return '#1a3a28';
+  if (n.type === 'unknown')      return '#1a3a28';
+  // Legacy discovery types
+  if (n.type === 'seed')         return '#2f6b45';
+  if (n.type === 'dynamic')      return '#6fe49b';
+  if (n.type === 'domain')       return '#1a3a28';
+  if (n.type === 'intersection') return '#46b06b';
+  return '#bdf2d0';
 }
 
 function forceStep() {
