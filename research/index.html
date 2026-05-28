@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khashif Research · console</title>
+<meta name="description" content="Khashif Topic Research console — run 5 role-specialized boost cycles against a topic partition, generate a report and a network map.">
+<meta name="theme-color" content="#060f0a">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://khashif.run/research/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23060f0a'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%2346b06b'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%236fe49b' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #060f0a; color: #d6e8dc; font-family: monospace;
+    min-height: 100vh; padding: 24px 32px;
+  }
+  .container { max-width: 1240px; margin: 0 auto; }
+  header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 0.5px solid rgba(70,176,107,0.22); padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  h1 { color: #6fe49b; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .nav { font-size: 10px; }
+  .nav a { color: rgba(70,176,107,0.85); text-decoration: none; margin-left: 18px; }
+  .nav a:hover { color: #6fe49b; }
+  .nav .partition { color: #ff8030; margin-left: 18px; }
+
+  .grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px; }
+  @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
+
+  .topic-panel, .cycles-panel, .viz-panel {
+    background: rgba(14,32,22,0.6); border: 0.5px solid rgba(70,176,107,0.18);
+    border-radius: 8px; padding: 22px 26px; margin-bottom: 24px;
+  }
+  .panel-title {
+    color: #6fe49b; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .topic-row { padding: 8px 0; border-bottom: 0.5px solid rgba(70,176,107,0.1); }
+  .topic-row:last-child { border-bottom: none; }
+  .topic-row .lbl {
+    color: rgba(189,242,208,0.55); font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .topic-row .val { color: #d6e8dc; font-size: 12px; line-height: 1.55; }
+  .topic-row .val a { color: #bdf2d0; }
+
+  .cycle {
+    display: grid; grid-template-columns: 36px 1fr auto; gap: 14px;
+    align-items: center; padding: 12px 0; border-bottom: 0.5px solid rgba(70,176,107,0.12);
+  }
+  .cycle:last-child { border-bottom: none; }
+  .cycle-n {
+    font-size: 13px; color: #46b06b; font-weight: 600;
+    text-align: center;
+  }
+  .cycle.done .cycle-n { color: #6fe49b; }
+  .cycle.done .cycle-n::after { content: " ✓"; }
+  .cycle .body { font-size: 12px; line-height: 1.5; }
+  .cycle .role {
+    color: #6fe49b; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .cycle .lbl { color: rgba(189,242,208,0.55); font-size: 11px; }
+  .cycle .summary { color: rgba(189,242,208,0.7); font-size: 11px; margin-top: 4px; }
+  button.cycle-action {
+    background: #2f6b45; color: #d6e8dc; padding: 8px 14px; border: none; cursor: pointer;
+    font-family: monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    border-radius: 4px;
+  }
+  button.cycle-action:hover { background: #46b06b; color: #060f0a; }
+  button.cycle-action.go { background: #ff8030; color: #060f0a; }
+  button.cycle-action.go:hover { background: #ffaa66; }
+  button.cycle-action:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .viz-stub {
+    min-height: 240px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: rgba(189,242,208,0.4); font-size: 11px; text-align: center; line-height: 1.65;
+  }
+  .viz-stub strong { color: #6fe49b; }
+
+  /* Modal */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(6,15,10,0.86); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px;
+  }
+  .modal-back.open { display: flex; }
+  .modal {
+    background: #0e2016; border: 0.5px solid #2f6b45; border-radius: 10px;
+    max-width: 880px; width: 100%; max-height: 86vh; display: flex; flex-direction: column;
+    box-shadow: 0 0 60px rgba(70,176,107,0.18);
+  }
+  .modal-head {
+    padding: 18px 24px 12px; border-bottom: 0.5px solid rgba(70,176,107,0.18);
+  }
+  .modal-head h2 { color: #6fe49b; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .modal-head .sub { color: rgba(189,242,208,0.5); font-size: 10px; margin-top: 4px; }
+  .modal-body {
+    padding: 18px 24px; overflow: auto; flex: 1;
+  }
+  textarea.prompt-box {
+    width: 100%; min-height: 420px; background: #060f0a; color: #d6e8dc;
+    border: 0.5px solid #2f6b45; border-radius: 4px; padding: 14px;
+    font-family: monospace; font-size: 11px; line-height: 1.6; resize: vertical;
+  }
+  .modal-foot {
+    padding: 14px 24px; display: flex; gap: 12px; align-items: center;
+    border-top: 0.5px solid rgba(70,176,107,0.18);
+  }
+  button.copy-btn { background: #ff8030; color: #060f0a; }
+  button.copy-btn:hover { background: #ffaa66; }
+  button.close-btn { background: transparent; color: rgba(189,242,208,0.65); border: 0.5px solid #2f6b45; }
+  button.close-btn:hover { color: #6fe49b; border-color: #46b06b; }
+  .copy-status { color: #6fe49b; font-size: 10px; letter-spacing: 0.1em; }
+
+  #boot { text-align: center; padding: 80px 24px; color: rgba(189,242,208,0.5); font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div id="boot">loading topic state…</div>
+    <div id="app" style="display:none;">
+      <header>
+        <h1>Khashif · Topic Research console</h1>
+        <div class="nav">
+          <a href="/research/new/">+ new topic</a>
+          <a href="/operator/">← operator room</a>
+          <span class="partition" id="partition-label"></span>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div>
+          <div class="topic-panel">
+            <div class="panel-title">topic</div>
+            <div class="topic-row"><div class="lbl">konu</div><div class="val" id="topic-konu">—</div></div>
+            <div class="topic-row"><div class="lbl">amaç</div><div class="val" id="topic-amac">—</div></div>
+            <div class="topic-row"><div class="lbl">kaynaklar</div><div class="val" id="topic-kaynaklar">—</div></div>
+            <div class="topic-row"><div class="lbl">created · last update</div><div class="val" id="topic-times" style="font-size:10px;color:rgba(189,242,208,0.55);">—</div></div>
+          </div>
+
+          <div class="cycles-panel">
+            <div class="panel-title">cycles · 5 role-specialized · 4 hard rules each</div>
+            <div id="cycles"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="viz-panel">
+            <div class="panel-title">network</div>
+            <div class="viz-stub" id="viz">
+              <strong>map appears after cycle 1+</strong><br>
+              each cycle's artifact contributes nodes + edges<br>
+              (canvas rendering — v0.2)
+            </div>
+          </div>
+
+          <div class="viz-panel">
+            <div class="panel-title">report · cycle 5 output</div>
+            <div id="report" style="font-size:11px;line-height:1.65;color:rgba(189,242,208,0.6);">not yet generated.<br>cycle 5 (report role) synthesizes the prior 4 cycles' artifacts.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-back" id="modal-back">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="modal-title">cycle prompt</h2>
+        <div class="sub" id="modal-sub">copy below and paste into a Claude Code session.</div>
+      </div>
+      <div class="modal-body">
+        <textarea class="prompt-box" id="prompt-box" readonly></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="cycle-action copy-btn" id="copy-btn">Copy to clipboard</button>
+        <button class="cycle-action close-btn" id="close-btn">Close</button>
+        <span class="copy-status" id="copy-status"></span>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ====== State + fetch ======
+const params = new URLSearchParams(location.search);
+const slug = params.get('slug');
+if (!slug) {
+  document.getElementById('boot').innerHTML = 'no slug provided. <a href="/research/new/" style="color:#6fe49b;">create a topic →</a>';
+} else {
+  loadState();
+}
+
+let STATE = null;
+
+async function loadState() {
+  try {
+    const res = await fetch('/api/research/' + encodeURIComponent(slug));
+    if (res.status === 404) {
+      document.getElementById('boot').innerHTML = 'topic <code style="color:#ff8030;">' + slug + '</code> not found. <a href="/research/new/" style="color:#6fe49b;">create a new topic →</a>';
+      return;
+    }
+    const data = await res.json();
+    STATE = data;
+    document.getElementById('boot').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    render(data);
+  } catch (e) {
+    document.getElementById('boot').textContent = 'fetch failed: ' + e.message;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render(data) {
+  const meta = data.meta || {};
+  document.getElementById('partition-label').textContent = 'partition: ' + data.slug;
+  document.getElementById('topic-konu').textContent = meta.konu || '—';
+  document.getElementById('topic-amac').textContent = meta.amac || '—';
+  const kaynaklarHtml = (meta.kaynaklar || []).length
+    ? meta.kaynaklar.map(k => k.startsWith('http')
+        ? '<a href="' + escapeHtml(k) + '" target="_blank" rel="noopener">' + escapeHtml(k) + '</a>'
+        : escapeHtml(k)).join('<br>')
+    : '—';
+  document.getElementById('topic-kaynaklar').innerHTML = kaynaklarHtml;
+  document.getElementById('topic-times').textContent =
+    (meta.created_at ? new Date(meta.created_at).toLocaleString() : '—') +
+    ' · ' + (data.updated_at ? new Date(data.updated_at).toLocaleString() : '—');
+
+  const wrap = document.getElementById('cycles');
+  wrap.innerHTML = '';
+  (data.cycle_template || []).forEach((tpl, idx) => {
+    const artifact = (data.cycles || [])[idx];
+    const done = !!artifact;
+    const row = document.createElement('div');
+    row.className = 'cycle' + (done ? ' done' : '');
+    row.innerHTML = `
+      <div class="cycle-n">${tpl.n}</div>
+      <div class="body">
+        <div class="role">${escapeHtml(tpl.role)}</div>
+        <div class="lbl">${escapeHtml(tpl.label)}</div>
+        ${done ? '<div class="summary">' + escapeHtml(artifact.summary || 'completed') + '</div>' : ''}
+      </div>
+      <button class="cycle-action ${done ? '' : 'go'}" data-n="${tpl.n}">
+        ${done ? 'View prompt' : 'Generate prompt'}
+      </button>
+    `;
+    wrap.appendChild(row);
+  });
+
+  wrap.querySelectorAll('button[data-n]').forEach(btn => {
+    btn.addEventListener('click', () => openCyclePrompt(parseInt(btn.dataset.n, 10)));
+  });
+
+  if (data.report && data.report.report_md) {
+    document.getElementById('report').textContent = data.report.report_md;
+    document.getElementById('report').style.whiteSpace = 'pre-wrap';
+  }
+}
+
+// ====== Cycle prompts ======
+// Each cycle's prompt is generated dynamically from STATE: topic context +
+// any accumulated prior artifacts + cycle role + 4 hard rules + Supabase
+// write template. The operator copies the prompt and pastes into a
+// Claude Code session; Claude (frontier) executes the research and
+// writes the artifact back to the topic partition.
+
+const FOUR_RULES = `## 4 hard rules (every artifact must pass)
+- NOVELTY    — at least one axis the operator does NOT already work in
+- MECHANISM  — concrete how-it-works (channel, hook, follow-through)
+- BUYER      — who pays / who responds, named or profiled
+- WHY NOW    — date / evidence the window is open in next ~90 days
+A candidate failing any single rule is dropped. Fewer sharp findings
+beat many vague ones. NONE is a valid answer if nothing surfaces.`;
+
+const SUPABASE_WRITE = `## Supabase write template (run inside the boost cycle)
+The topic partition lives at \`khashif_memory\` row \`key='topic_<SLUG>'\`.
+Use the service_role key from \`Dev/Khashif/.secrets.env\` (SUPABASE_SERVICE_ROLE_KEY).
+
+\`\`\`bash
+# 1) Read current partition state
+curl -sS "$SUPABASE_URL/rest/v1/khashif_memory?key=eq.topic_<SLUG>&select=value" \\
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \\
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY"
+
+# 2) Mutate locally (Python): set memory.cycles[N-1] = artifact + bump
+#    memory.topic_meta.cycles_done. Then upsert:
+curl -sS -X POST "$SUPABASE_URL/rest/v1/khashif_memory" \\
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \\
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \\
+  -H "Content-Type: application/json" \\
+  -H "Prefer: resolution=merge-duplicates" \\
+  -d '{"key":"topic_<SLUG>","value":"<json.dumps(memory)>","updated_at":"<ISO>"}'
+\`\`\`
+
+After the write succeeds, refresh https://khashif.run/research/?slug=<SLUG>
+— the cycle row will flip to ✓ and the network/report sections grow.`;
+
+const CYCLE_PROMPTS = {
+  1: {
+    role: 'keşif',
+    intro: `You are running CYCLE 1 (KEŞİF / reconnaissance) of a Khashif
+Topic Research run. This cycle's job is to identify the AXES of the
+topic — the main dimensions an outreach strategy must address.`,
+    task: `## Task
+Run WebSearch + WebFetch grounded in 2026 reality. Identify 5-8 distinct
+AXES of this topic. For each axis: name it, give one paragraph of
+initial findings, cite 1-3 real source URLs. Then recommend which axis
+Cycle 2 should deep-dive into and why.
+
+Do NOT synthesize a strategy yet. Cycle 1's job is reconnaissance only.
+
+Apply the 4 hard rules: every axis must NOVELTY / MECHANISM / BUYER /
+WHY NOW. Drop axes that fail any rule.`,
+    schema: `## Artifact schema (write to cycles[0])
+{
+  "role": "keşif",
+  "axes": [
+    { "name": "...", "finding": "1 paragraph", "sources": ["url1", "url2"] },
+    ...
+  ],
+  "summary": "1-2 sentence summary of the 5-8 axes found",
+  "next_recommendation": "Cycle 2 should deep-dive into '<axis name>' because <why>",
+  "created_at": "<ISO>"
+}`,
+  },
+  2: {
+    role: 'deep-dive-a',
+    intro: `You are running CYCLE 2 (DEEP DIVE A) of the Topic Research run.
+This cycle's job is to deep-dive into the PRIMARY axis chosen at the
+end of Cycle 1.`,
+    task: `## Task
+Read Cycle 1's axes + next_recommendation. Take the recommended axis
+(or pick the strongest if recommendation is ambiguous). Deep-dive:
+
+- Who specifically (named people, organizations, channels)
+- Where exactly (URLs, forums, communities, lists)
+- What messaging hook works for this audience
+- What's reachable in the next 30-60 days
+
+Run WebFetch against real targets — actual posts, profiles, threads.
+Apply the 4 hard rules per finding. Drop the soft ones.`,
+    schema: `## Artifact schema (write to cycles[1])
+{
+  "role": "deep-dive-a",
+  "axis": "<axis name from Cycle 1>",
+  "contacts": [{"name":"","role":"","url":"","channel":"","note":""}],
+  "channels": [{"name":"","type":"","size_or_activity":"","url":""}],
+  "messaging_hooks": [{"hook":"","rationale":"","target_persona":""}],
+  "next_30d_actions": ["..."],
+  "summary": "1-2 sentence summary",
+  "created_at": "<ISO>"
+}`,
+  },
+  3: {
+    role: 'deep-dive-b',
+    intro: `You are running CYCLE 3 (DEEP DIVE B). Same shape as Cycle 2 but
+on a DIFFERENT axis — pick the second-strongest axis from Cycle 1
+(NOT the one Cycle 2 covered).`,
+    task: `## Task
+Same depth as Cycle 2 but on a complementary axis. Different angle,
+different reach. Avoid retracing Cycle 2's ground.
+
+Apply the 4 hard rules.`,
+    schema: `## Artifact schema (write to cycles[2])
+Same as Cycle 2 but role = "deep-dive-b" and axis != Cycle 2's axis.`,
+  },
+  4: {
+    role: 'intersect',
+    intro: `You are running CYCLE 4 (INTERSECTION SYNTHESIS). This cycle
+crosses the topic against Khashif's resonance lens — the operator's
+BASE_KEYWORDS cluster (AI agent + sound therapy + grant landscape +
+indie founder + substrate builder + breath/vagus + KKTC/Cyprus +
+recycling/logistics). Where do unexpected adjacencies surface?`,
+    task: `## Task
+Read Cycles 1-3 artifacts. Now cross with Khashif's resonance keys.
+What domain pairs surface that neither Cycle 2 nor Cycle 3 reached?
+Example shape: "<topic axis> × <resonance domain> = <new reach>".
+
+Produce 2-4 intersections, each passing the 4 hard rules. Each
+intersection should suggest a CONCRETE next move (not just "explore").
+This is the *su + un = ekmek* primitive — two ingredients producing
+a new offering.`,
+    schema: `## Artifact schema (write to cycles[3] AND memory.intersections[])
+{
+  "role": "intersect",
+  "intersections": [
+    {
+      "pair": "X × Y",
+      "insight": "what neither pole captures alone",
+      "opportunity": "concrete reachable move",
+      "mechanism": "how the crossing produces reach",
+      "who_pays": "named buyer/persona",
+      "why_now": "evidence the window is open",
+      "strength": 1-5
+    }
+  ],
+  "summary": "1-2 sentence summary",
+  "created_at": "<ISO>"
+}
+
+ALSO: append each intersection to memory.intersections[] (the persistent
+boost-layer pool — same row as the partition memory).`,
+  },
+  5: {
+    role: 'report',
+    intro: `You are running CYCLE 5 (FINAL REPORT). This cycle synthesizes
+Cycles 1-4 into a single shipping artifact. No new research; only
+distillation.`,
+    task: `## Task
+Read Cycles 1-4 artifacts and memory.intersections. Produce a markdown
+report with these sections:
+
+# <Topic Title>
+
+## Summary (3-5 sentences)
+What this research found, the strongest 1-2 moves.
+
+## Recommended actions
+- 30 days: <action> | owner | metric
+- 60 days: <action> | owner | metric
+- 90 days: <action> | owner | metric
+
+## Named contacts / channels
+(Table: name | role | url | channel | first-touch hook)
+
+## Intersections worth carrying forward
+(From Cycle 4, ranked by strength.)
+
+## Risks + dependencies
+(Brief.)
+
+## One quote that matters
+(From a real source URL surfaced in Cycles 1-3.)
+
+Apply the 4 hard rules across the whole report — drop anything that
+fails. Cite real URLs.`,
+    schema: `## Artifact schema (write to cycles[4] AND memory.report)
+{
+  "role": "report",
+  "report_md": "<full markdown text>",
+  "recommendations": [
+    {"horizon":"30 days","action":"...","owner":"...","metric":"..."},
+    {"horizon":"60 days","action":"...","owner":"...","metric":"..."},
+    {"horizon":"90 days","action":"...","owner":"...","metric":"..."}
+  ],
+  "named_contacts_count": N,
+  "intersections_carried": N,
+  "summary": "1-2 sentence summary",
+  "created_at": "<ISO>"
+}
+
+ALSO write memory.report = <the markdown text> so the page renders it
+in the report section.`,
+  },
+};
+
+function buildPrompt(cycleN) {
+  const tpl = CYCLE_PROMPTS[cycleN];
+  if (!tpl) return null;
+  const meta = STATE.meta || {};
+  const slugStr = STATE.slug;
+
+  const ctxBlock = `## Topic context
+- konu:      ${meta.konu || '—'}
+- amaç:      ${meta.amac || '—'}
+- kaynaklar: ${(meta.kaynaklar || []).join(', ') || '—'}
+- slug:      ${slugStr}
+- partition: topic_${slugStr}`;
+
+  // Accumulate prior cycle artifacts
+  let priorBlock = '';
+  if (cycleN > 1) {
+    const prior = (STATE.cycles || []).slice(0, cycleN - 1).map((a, i) => {
+      if (!a) return `### Cycle ${i+1} — NOT YET RUN. Cannot proceed.`;
+      return `### Cycle ${i+1} artifact (role: ${a.role})\n\`\`\`json\n${JSON.stringify(a, null, 2)}\n\`\`\``;
+    });
+    priorBlock = `\n## Prior cycle artifacts\n${prior.join('\n\n')}\n`;
+  }
+
+  return [
+    `# Khashif Topic Research · Cycle ${cycleN} (${tpl.role})`,
+    '',
+    tpl.intro,
+    '',
+    ctxBlock,
+    priorBlock,
+    tpl.task,
+    '',
+    FOUR_RULES,
+    '',
+    tpl.schema,
+    '',
+    SUPABASE_WRITE.replace(/<SLUG>/g, slugStr),
+    '',
+    `When the partition write succeeds, report briefly to the operator
+in Turkish: what was found, what surprised, what the next cycle should
+focus on. Then stop. Do NOT auto-run other cycles.`,
+  ].join('\n');
+}
+
+// ====== Modal ======
+function openCyclePrompt(n) {
+  const tpl = CYCLE_PROMPTS[n];
+  if (!tpl) return;
+  const prompt = buildPrompt(n);
+  document.getElementById('modal-title').textContent = `Cycle ${n} · ${tpl.role}`;
+  document.getElementById('modal-sub').textContent = `${(STATE.cycle_template[n-1] || {}).label || ''}. Copy below into a Claude Code session.`;
+  document.getElementById('prompt-box').value = prompt;
+  document.getElementById('modal-back').classList.add('open');
+  document.getElementById('copy-status').textContent = '';
+}
+
+document.getElementById('close-btn').addEventListener('click', () => {
+  document.getElementById('modal-back').classList.remove('open');
+});
+document.getElementById('modal-back').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-back') {
+    document.getElementById('modal-back').classList.remove('open');
+  }
+});
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  const box = document.getElementById('prompt-box');
+  try {
+    await navigator.clipboard.writeText(box.value);
+    document.getElementById('copy-status').textContent = '✓ copied — paste into Claude Code';
+  } catch (e) {
+    box.select();
+    document.execCommand('copy');
+    document.getElementById('copy-status').textContent = '✓ copied (fallback)';
+  }
+});
+
+// Auto-refresh state every minute so cycle ✓ marks appear as artifacts land
+if (slug) setInterval(loadState, 60000);
+</script>
+</body>
+</html>
