@@ -347,7 +347,12 @@ function forceStep() {
     const dx = b.x - a.x, dy = b.y - a.y;
     const d = Math.sqrt(dx*dx + dy*dy) || 1;
     const ideal = a.type === 'center' ? 170 : b.type === 'content' ? 70 : 110;
-    const f = (d - ideal) * 0.018 * e.strength;
+    // Default strength=1 when edge data omits it (footprint edges).
+    // Without this, undefined*number = NaN → forceStep cascades NaN
+    // into vx/vy → all node positions become NaN within ~2 frames →
+    // canvas renders blank. Bug observed 28 May 2026 on first
+    // footprint sweep.
+    const f = (d - ideal) * 0.018 * (e.strength || 1);
     const fx = (dx/d)*f, fy = (dy/d)*f;
     if (!a.pinned) { a.vx += fx; a.vy += fy; }
     if (!b.pinned) { b.vx -= fx; b.vy -= fy; }
@@ -434,7 +439,7 @@ function draw() {
     // Boost baseline visibility — every edge should be perceptible without
     // hover. The web has to *look* like a web before any interaction.
     const minAlpha = 0.16 * baseAlphaMult;
-    const baseAlpha = Math.max(minAlpha, 0.32 * e.strength * baseAlphaMult);
+    const baseAlpha = Math.max(minAlpha, 0.32 * (e.strength || 1) * baseAlphaMult);
     const alpha = isHovRelated
       ? Math.min(0.85, 0.65 * baseAlphaMult)
       : hoveredNode
