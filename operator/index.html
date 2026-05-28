@@ -246,6 +246,19 @@
     </div>
   </div>
 
+  <div class="news-row" id="research-row">
+    <div class="news-head">
+      <h2>Research · topic boost cycles</h2>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+        <a href="/research/new/" style="font-size:10px;color:#060f0a;letter-spacing:0.1em;text-decoration:none;background:#ff8030;padding:5px 12px;border-radius:4px;font-weight:600;">+ new topic</a>
+        <span class="meta" id="research-meta">loading…</span>
+      </div>
+    </div>
+    <div class="news-list" id="research-list" style="max-height:280px;">
+      <div class="empty">loading active topics…</div>
+    </div>
+  </div>
+
   <div class="news-row">
     <div class="news-head">
       <h2>News · agent / frontier feed</h2>
@@ -401,8 +414,10 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
     refresh();
     loadKeywords();
     loadNews();
+    loadResearch();
     setInterval(refresh, 60000); // every minute
     setInterval(loadNews, 60000); // news also refreshes minute-by-minute
+    setInterval(loadResearch, 60000); // research panel refreshes too
   }
 
   // -------- API --------
@@ -589,6 +604,52 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
     }
   });
 
+  // -------- research panel --------
+  // Lists active topic research partitions (topic_<slug>). Each row:
+  // title · cycle progress · last update · "open console" link. Click to
+  // /research/?slug=<slug>. Backed by GET /research/list (public).
+  async function loadResearch() {
+    const list = document.getElementById("research-list");
+    const meta = document.getElementById("research-meta");
+    try {
+      const res = await fetch(API_BASE + "/research/list");
+      const data = await res.json();
+      if (!data || !Array.isArray(data.topics)) {
+        meta.textContent = "list unavailable";
+        list.innerHTML = '<div class="empty">research list couldn\'t load.</div>';
+        return;
+      }
+      if (!data.topics.length) {
+        meta.textContent = "0 topics yet";
+        list.innerHTML = '<div class="empty">No topics yet. Click "+ new topic" to start a research run.</div>';
+        return;
+      }
+      meta.textContent = `${data.count} topic${data.count === 1 ? '' : 's'} · auto-refresh 1m`;
+      list.innerHTML = data.topics.map(t => {
+        const konu = escapeHtml((t.konu || "").substring(0, 100));
+        const slug = encodeURIComponent(t.slug);
+        const done = t.cycles_done || 0;
+        const planned = t.cycles_planned || 5;
+        const progress = `${done}/${planned}`;
+        const ago = timeAgo(t.updated_at);
+        const reportBadge = t.has_report
+          ? '<span style="font-size:9px;color:#ff8030;letter-spacing:0.1em;margin-left:8px;">REPORT ✓</span>'
+          : '';
+        return `
+          <div class="news-item">
+            <span class="source-pill">${progress}</span>
+            <div class="news-body">
+              <div class="news-title"><a href="/research/?slug=${slug}">${konu}</a>${reportBadge}</div>
+              <div class="news-meta-row">${ago} · slug: ${escapeHtml(t.slug)}</div>
+            </div>
+          </div>`;
+      }).join("");
+    } catch (e) {
+      meta.textContent = "list error";
+      list.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
   // -------- news board --------
   // Renders memory["news_feed"] as a list of clickable headlines.
   // Each item: source pill · time-ago · clickable title · summary.
@@ -689,7 +750,7 @@ Important: the free-tier journey does not touch this key (khashif_network_viz.ge
   });
   document.getElementById("aux-network").addEventListener("click", () => { window.open("/network/", "_blank"); });
   document.getElementById("aux-intersections").addEventListener("click", () => { window.open("/intersections/", "_blank"); });
-  document.getElementById("aux-refresh").addEventListener("click", () => { refresh(); loadKeywords(); loadNews(); });
+  document.getElementById("aux-refresh").addEventListener("click", () => { refresh(); loadKeywords(); loadNews(); loadResearch(); });
 })();
 </script>
 </body>
