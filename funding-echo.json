@@ -1,0 +1,51 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "owner",
+    "name": "Tağmaç Çankaya",
+    "email": "tagmacc@gmail.com",
+    "phone": "90-533-880-0870",
+    "description": "Independent maintainer in Lefkoşa, Cyprus (Republic of Cyprus / EU citizen). I build small, commons-aligned AGPLv3 tools for solo operators and small teams: Echo Toolkit (discovery), Cairn (token-efficient multi-agent coordination), and Khashif. A consistent discipline across fifteen years of civic, environmental, and digital work: efficiency through configuration, not brute force; ship something concrete and let it endure.",
+    "webpageUrl": {
+      "url": "https://khashif.run"
+    }
+  },
+  "projects": [
+    {
+      "guid": "echo",
+      "name": "Echo Toolkit",
+      "description": "A free AGPLv3 toolkit that lets any solo operator, researcher, or small team build their own autonomous discovery agent. It harvests sources across the open web, classifies and scores them with a rotating cascade of free-tier models (zero marginal cost), runs a bounded multi-hop crawl, and formulates cross-domain intersections — where two unrelated signals suggest an opportunity neither could surface alone. Echo is the open-source engine beneath a private discovery agent (Khashif), shipped so the architecture is reusable: the free-tier cost-cascade, the intersection primitive, pluggable storage and outbound adapters (sqlite/Supabase, GitHub issues/Resend), and an echo/return-listening layer. Submitted to NLnet NGI Zero Commons (code 2026-06-2f6). FLOSS/fund support would fund the v1 public build: the discovery and crawl engine, the intersection engine, reference adapters, and documentation so downstream operators can run their own discovery substrate.",
+      "webpageUrl": {
+        "url": "https://github.com/echo-toolkit/echo"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/echo-toolkit/echo"
+      },
+      "licenses": ["spdx:AGPL-3.0-or-later"],
+      "tags": ["ai", "llm", "discovery", "agentic-ai", "intersection-intelligence", "cost-cascade", "rss", "developer-tools", "python", "commons"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "bank-eu",
+        "type": "bank",
+        "description": "EU (Cyprus) bank transfer. Account details provided on request to the maintainer."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "echo-dev-grant",
+        "status": "active",
+        "name": "Echo Toolkit v1 development grant",
+        "description": "Fund ~5 months of solo engineering: the discovery + multi-hop crawl engine, the free-tier cost-cascade, the intersection-intelligence primitive, reference storage/outbound adapters (sqlite+Supabase, GitHub issues+Resend), a demo app, and documentation. Milestone-deliverable.",
+        "amount": 40000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank-eu"]
+      }
+    ]
+  }
+}
